@@ -12,8 +12,8 @@ design docs [`01`](01-landscape-research.md)–[`05`](05-production-system-desig
 ## ⚡ Quickstart — run the mini-RAG (clone & run)
 
 ```bash
-git clone <your-repo-url>
-cd sanskrit-assignment
+git clone https://github.com/AniruddhaPKawarase/sanskrit-english-retrieval.git
+cd sanskrit-english-retrieval
 pip install -r requirements.txt          # CPU is fine for the demo (no GPU needed)
 python mini_rag.py "what does the Gita say about karma?"
 ```
