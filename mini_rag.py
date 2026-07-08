@@ -23,7 +23,7 @@ from sanskrit_retrieval import data, model as M, index as IX
 
 # Fine-tuned weights are hosted on the HF Hub (too large for GitHub). Published with:
 #   SentenceTransformer("<drive>/artifacts/e5-small-sa-en-mnrl").push_to_hub("sanskrit-e5-small-retrieval")
-FINETUNED_HF_ID = "AniruddhaPKawarase/sanskrit-e5-small-retrieval"
+FINETUNED_HF_ID = "AniruddhaAI/sanskrit-e5-small-retrieval"
 
 
 def resolve_model(cfg, explicit: str | None):

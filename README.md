@@ -40,7 +40,7 @@ python mini_rag.py --model artifacts/e5-small-sa-en-mnrl "karma"      # use the 
 ```
 
 - **Out of the box** the demo downloads the **fine-tuned checkpoint from the Hugging Face Hub**
-  (`AniruddhaPKawarase/sanskrit-e5-small-retrieval`) — this gives the strong Sanskrit results below.
+  (`AniruddhaAI/sanskrit-e5-small-retrieval`) — this gives the strong Sanskrit results below.
 - Model resolution order: `--model` > local `artifacts/<run_name>/` (if the notebook produced it) >
   the HF-hosted fine-tuned model > base `multilingual-e5-small` (graceful fallback if HF is unreachable).
 - Retrieval only; pass an LLM to `sanskrit_retrieval.rag.answer(...)` to add grounded generation.
@@ -63,7 +63,7 @@ Full tables, failure analysis, and the honest OOD framing are in [`report/REPORT
 
 ## Model weights
 The fine-tuned checkpoint (~471 MB) is **too large for GitHub's 100 MB file limit**, so it is hosted on
-the **Hugging Face Hub**: [`AniruddhaPKawarase/sanskrit-e5-small-retrieval`](https://huggingface.co/AniruddhaPKawarase/sanskrit-e5-small-retrieval).
+the **Hugging Face Hub**: [`AniruddhaAI/sanskrit-e5-small-retrieval`](https://huggingface.co/AniruddhaAI/sanskrit-e5-small-retrieval).
 `mini_rag.py` and the notebook download it automatically. It was produced by the training notebook and
 published with:
 ```python
