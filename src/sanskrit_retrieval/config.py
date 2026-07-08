@@ -45,7 +45,7 @@ class Config:
     hard_neg_margin: float = 0.05
     hard_neg_range_min: int = 25  # also skip more top neighbours before sampling negatives
 
-    # --- mark3 recipe (research-backed) ---
+    # --- advanced recipe (research-backed) ---
     # CachedGISTEmbedLoss: a frozen guide model masks near-duplicate in-batch negatives
     # (the false-negative fix that naive/margin hard-neg mining could not achieve); Cached
     # gives a large effective batch on a T4; Matryoshka yields truncatable embeddings.

@@ -3,7 +3,7 @@
 Cross-encoders read (query, passage) jointly, so they rank more accurately than
 a bi-encoder — but a reranker that hasn't seen the language can REGRESS on
 cross-lingual pairs. So `evaluate_rerank` returns a paired before/after on the
-SAME candidate set; only ship reranking if the delta is positive (mark3 gate).
+SAME candidate set; only ship reranking if the delta is positive (gated eval).
 
 `_rank_metrics` is pure (no ML deps) and unit-tested.
 """

@@ -15,7 +15,7 @@ docs/sanskrit-assignment/
 ├── README.md                       # setup + how to run
 ├── report/REPORT.md                # the graded short report (9 sections from spec)
 ├── notebooks/
-│   └── sanskrit_retrieval_finetune.ipynb   # the Colab: end-to-end, richly explained
+│   └── sanskrit_english_retrieval.ipynb   # the Colab: end-to-end, richly explained
 ├── src/sanskrit_retrieval/
 │   ├── config.py                   # typed config, no hardcoded values
 │   ├── data.py                     # load Itihasa/FLORES/Gita, normalize, dedup, pairs
@@ -26,7 +26,7 @@ docs/sanskrit-assignment/
 │   ├── index.py                    # FAISS build/search
 │   └── rag.py                      # retrieve → (optional) LLM answer
 ├── tests/                          # pytest: landmines + data + eval invariants
-├── scripts/                        # CLI wrappers (prep, train, eval)
+├── mini_rag.py                     # standalone clone-and-run retrieval demo
 └── requirements.txt
 ```
 
@@ -72,12 +72,12 @@ Adjustment levers, in priority order: (1) batch size ↑ for more in-batch negat
 | Spec requirement | Where it's satisfied |
 |---|---|
 | 1. GitHub repo or zip | The `docs/sanskrit-assignment/` bundle |
-| 2. Colab notebook(s) | `notebooks/sanskrit_retrieval_finetune.ipynb` |
+| 2. Colab notebook(s) | `notebooks/sanskrit_english_retrieval.ipynb` |
 | 3. README with setup | `README.md` |
 | 4. Short report (PDF/MD) | `report/REPORT.md` — 9 sections |
 | 5. Sample outputs | Qualitative retrievals + RAG answers in notebook & report |
 | 6. Trained adapters/checkpoints (optional) | Saved to disk / HF Hub; link in README |
-| 7. Evaluation scripts | `src/…/evaluate.py` + `scripts/` |
+| 7. Evaluation scripts | `src/…/evaluate.py` + `tests/` |
 
 **Report's 9 required sections** (spec): problem understanding · dataset prep · why this base model · fine-tuning approach · hardware constraints & optimizations · evaluation methodology · failure cases · challenges · what I'd improve with more time. The "why this, not that" comparison lives in *§3 (base model)* + a dedicated comparison table.
 

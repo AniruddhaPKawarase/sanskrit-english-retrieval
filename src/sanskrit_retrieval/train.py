@@ -32,7 +32,7 @@ def _to_input_examples(pairs: list[dict]):
 
 def _build_loss(model, cfg: Config, loss_type: str):
     """Pick the contrastive loss. `gist`/`cached_gist` load a frozen guide model
-    that masks near-duplicate in-batch negatives (false-negative fix, mark3).
+    that masks near-duplicate in-batch negatives (false-negative fix).
     Optionally wrapped in MatryoshkaLoss. Falls back to Cached-MNRL if the
     installed sentence-transformers lacks GIST."""
     from sentence_transformers import losses, SentenceTransformer
