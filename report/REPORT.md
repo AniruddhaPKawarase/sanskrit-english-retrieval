@@ -56,7 +56,7 @@ Single Colab **T4 (16GB)**. `max_seq_len=128` (verses are short) keeps activatio
 batch → more negatives. fp16 throughout. `IndexFlatIP` (exact) for the demo/eval so ANN
 approximation never confounds recall. Local RTX 3050 (4GB) is dev/smoke-test only — its VRAM caps
 batch size, which specifically starves in-batch negatives (see `01`). Bonus experiments run:
-INT8 quantization (100% recall retention, 4× smaller index) and an e5-base comparison — see §6.
+INT8 quantization (100% recall retention, 4× smaller index) and an e5-base comparison — see section 6.
 
 ## 6. Evaluation methodology & results
 `InformationRetrievalEvaluator` → Recall / MRR / nDCG @ {1,5,10}, on (a) in-domain Itihasa test and
@@ -106,8 +106,8 @@ Itihasa slice reported an inflated R@1 0.812, which overstated generalization an
 | A | e5-small, MNRL, bs64, 1ep | 0.789 | 0.937 | 0.864 | headline run |
 | bonus | e5-base, MNRL, bs64, 1ep | 0.877 | 0.973 | 0.925 | best quality |
 | OOD | e5-small run A, Gita cross-domain | 0.718 | 0.940 | 0.832 | honest generalization |
-| B (pre-fix) | e5-small + naive hard-negs (20K) | 0.676 | 0.884 | 0.778 | regressed — false negatives (§7) |
-| B (margin) | + margin guard 0.05 + range_min=25 | 0.147 | 0.331 | 0.230 | guard rejected 99.6% → only 20 valid triplets → ~untrained (§7) |
+| B (pre-fix) | e5-small + naive hard-negs (20K) | 0.676 | 0.884 | 0.778 | regressed — false negatives (section 7) |
+| B (margin) | + margin guard 0.05 + range_min=25 | 0.147 | 0.331 | 0.230 | guard rejected 99.6% → only 20 valid triplets → ~untrained (section 7) |
 
 ## 7. Failure cases
 - **Hard-negative mining does not fit this corpus (headline finding — a documented negative result).**
@@ -137,7 +137,7 @@ preserving a large negative count.
 
 ## 9. What I'd improve with more time
 Already explored (bonus): e5-base (higher quality), INT8 quantization (free 4× index shrink), and
-hard-negative mining (regressed on naive settings → fixed with a false-negative margin guard, §7).
+hard-negative mining (regressed on naive settings → fixed with a false-negative margin guard, section 7).
 Remaining: a true out-of-domain number via authenticated IN22/FLORES (or the wired Gita tier); a
 hand-labelled thematic query set for RAG-realistic eval beyond 1:1 translation retrieval; the
 reverse (En→Sa) retrieval direction reported alongside Sa→En; a query-time script-normalization step

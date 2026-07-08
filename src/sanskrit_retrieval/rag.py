@@ -4,7 +4,7 @@ The LLM step is pluggable and OFF by default — the assignment's core is
 retrieval, and hardcoding a paid API would hurt reproducibility. Pass any
 callable llm_fn(prompt) -> str to enable grounded answering.
 
-Security (05 §5, OWASP-LLM): retrieved passages are untrusted-ish text that
+Security (05 section 5, OWASP-LLM): retrieved passages are untrusted-ish text that
 flows into an LLM prompt. We wrap them in an explicit context block and instruct
 the model to answer ONLY from context, which reduces (not eliminates) prompt
 injection. Real deployments add output filtering + allow-listing.

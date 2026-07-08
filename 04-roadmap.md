@@ -79,7 +79,7 @@ Adjustment levers, in priority order: (1) batch size ↑ for more in-batch negat
 | 6. Trained adapters/checkpoints (optional) | Saved to disk / HF Hub; link in README |
 | 7. Evaluation scripts | `src/…/evaluate.py` + `tests/` |
 
-**Report's 9 required sections** (spec): problem understanding · dataset prep · why this base model · fine-tuning approach · hardware constraints & optimizations · evaluation methodology · failure cases · challenges · what I'd improve with more time. The "why this, not that" comparison lives in *§3 (base model)* + a dedicated comparison table.
+**Report's 9 required sections** (spec): problem understanding · dataset prep · why this base model · fine-tuning approach · hardware constraints & optimizations · evaluation methodology · failure cases · challenges · what I'd improve with more time. The "why this, not that" comparison lives in *section 3 (base model)* + a dedicated comparison table.
 
 ---
 
@@ -114,19 +114,19 @@ Each point is checked against the plan. Full production design is in [`05`](05-p
 
 | # | Perspective | Take-home scope decision | Prod design |
 |---|---|---|---|
-| 1 | **Scaling** | N/A — single-node notebook; index fits RAM (~285MB). Correct for scope. | [05 §1] |
-| 2 | **Optimization** | `IndexFlatIP` (exact) for honest recall; seq-len 128 + fp16 + batch tuning. INT8 = bonus. | [05 §2] |
-| 3 | **Performance metrics** | Offline Recall@K/MRR/nDCG (in-domain+OOD) + train time + index size. | [05 §3] |
-| 4 | **Request handling** | RAG demo validates input, applies prefixes server-side, top-k timeout. | [05 §4] |
-| 5 | **Vulnerability** | Input validation on query; **prompt-injection note** for the LLM RAG step; pinned deps; verify HF model provenance. | [05 §5] |
-| 6 | **SDLC** | Repo structure, pinned reqs, pytest, **eval-as-a-gate** in review pass R, reproducible seeds. | [05 §6] |
-| 7 | **Compliance** | **Strength:** Itihasa public-domain + e5 MIT = clean licensing. Respectful handling of sacred text noted. | [05 §7] |
-| 8 | **DR & backup** | **Index is derivable** from source corpus + model → cheap rebuild; checkpoint saved. | [05 §8] |
-| 9 | **Support & helpdesk** | N/A for take-home; feedback→hard-negative flywheel designed. | [05 §9] |
-| 10 | **System maintenance** | Retraining cadence + re-embedding on model upgrade + drift monitoring (designed). | [05 §10] |
-| 11 | **Network & security** | N/A single-node; TLS/authN/VPC/egress-control designed. | [05 §11] |
-| 12 | **Resource mgmt / automation** | Scripts + config-driven runs (no hardcoded values); IaC/autoscaling designed. | [05 §12] |
-| 13 | **Other** (observability, ingestion-at-scale, transliteration-in-prod, online eval, data flywheel) | Transliteration normalization is *in* the take-home; rest designed. | [05 §13] |
+| 1 | **Scaling** | N/A — single-node notebook; index fits RAM (~285MB). Correct for scope. | [05 section 1] |
+| 2 | **Optimization** | `IndexFlatIP` (exact) for honest recall; seq-len 128 + fp16 + batch tuning. INT8 = bonus. | [05 section 2] |
+| 3 | **Performance metrics** | Offline Recall@K/MRR/nDCG (in-domain+OOD) + train time + index size. | [05 section 3] |
+| 4 | **Request handling** | RAG demo validates input, applies prefixes server-side, top-k timeout. | [05 section 4] |
+| 5 | **Vulnerability** | Input validation on query; **prompt-injection note** for the LLM RAG step; pinned deps; verify HF model provenance. | [05 section 5] |
+| 6 | **SDLC** | Repo structure, pinned reqs, pytest, **eval-as-a-gate** in review pass R, reproducible seeds. | [05 section 6] |
+| 7 | **Compliance** | **Strength:** Itihasa public-domain + e5 MIT = clean licensing. Respectful handling of sacred text noted. | [05 section 7] |
+| 8 | **DR & backup** | **Index is derivable** from source corpus + model → cheap rebuild; checkpoint saved. | [05 section 8] |
+| 9 | **Support & helpdesk** | N/A for take-home; feedback→hard-negative flywheel designed. | [05 section 9] |
+| 10 | **System maintenance** | Retraining cadence + re-embedding on model upgrade + drift monitoring (designed). | [05 section 10] |
+| 11 | **Network & security** | N/A single-node; TLS/authN/VPC/egress-control designed. | [05 section 11] |
+| 12 | **Resource mgmt / automation** | Scripts + config-driven runs (no hardcoded values); IaC/autoscaling designed. | [05 section 12] |
+| 13 | **Other** (observability, ingestion-at-scale, transliteration-in-prod, online eval, data flywheel) | Transliteration normalization is *in* the take-home; rest designed. | [05 section 13] |
 
 **Verdict:** the roadmap is coherent and correctly scoped — take-home builds the model + eval + demo + tests; the 12 points are satisfied as *design* where building them would be out-of-scope over-engineering. No blocking issues found in review.
 

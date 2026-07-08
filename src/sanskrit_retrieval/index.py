@@ -2,7 +2,7 @@
 
 IndexFlatIP (exact inner product) is deliberate: on ~90-186K vectors it is fast,
 and being exact it gives ground-truth recall so ANN approximation can't confound
-the eval (03 §4 / 05 §2). Vectors must be L2-normalized so inner product ==
+the eval (03 section 4 / 05 section 2). Vectors must be L2-normalized so inner product ==
 cosine — the model layer already normalizes.
 """
 from __future__ import annotations

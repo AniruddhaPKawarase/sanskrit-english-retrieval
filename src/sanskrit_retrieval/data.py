@@ -55,7 +55,7 @@ def augment_iast(
     transliterate_fn: Callable[[str], str] | None = None,
 ) -> list[dict]:
     """Add IAST (Roman) variants of a fraction of Sanskrit-side pairs so the
-    model is robust to transliterated queries (03 §2). Deterministic via seed.
+    model is robust to transliterated queries (03 section 2). Deterministic via seed.
 
     transliterate_fn is injectable so this is testable without the
     indic-transliteration dependency; defaults to normalize.to_iast on Colab.

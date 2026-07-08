@@ -1,5 +1,5 @@
 """Pure-logic tests for pair construction / dedup / split / IAST augment.
-No network, no ML deps, no GPU — guards the silent-failure landmines from 03 §5.
+No network, no ML deps, no GPU — guards the silent-failure landmines from 03 section 5.
 """
 import pytest
 

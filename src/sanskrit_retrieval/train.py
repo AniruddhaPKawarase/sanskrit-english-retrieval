@@ -2,7 +2,7 @@
 
 MNRL uses in-batch negatives: every other positive in the batch is a negative
 for the current anchor. So batch size IS the negative count — bigger batch =
-better embeddings (03 §3). Gradient accumulation does NOT add in-batch
+better embeddings (03 section 3). Gradient accumulation does NOT add in-batch
 negatives, so we prioritize raw batch size; CachedMNRL fakes a large effective
 batch when VRAM is the limit.
 """

@@ -2,7 +2,7 @@
 
 e5 is asymmetric: queries get "query: " and passages get "passage: ", and
 embeddings are L2-normalized. Centralizing this here means no caller can forget
-the prefix (03 §5 landmine) — everyone goes through encode_queries/passages.
+the prefix (03 section 5 landmine) — everyone goes through encode_queries/passages.
 """
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ def encode_passages(model, texts: list[str], cfg: Config = DEFAULT):
 
 def devanagari_fertility(model, words: list[str]) -> float:
     """Mean subword tokens per word for the model's tokenizer — the tokenizer
-    diagnostic the assignment explicitly asks about (03 §1). >1 means Sanskrit
+    diagnostic the assignment explicitly asks about (03 section 1). >1 means Sanskrit
     words fragment into multiple subwords, burning context and signal.
     """
     tok = model.tokenizer

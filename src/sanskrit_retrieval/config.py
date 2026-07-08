@@ -9,7 +9,7 @@ from dataclasses import dataclass, field, replace
 
 @dataclass(frozen=True)
 class Config:
-    # --- Model (see 03-technical-design.md §1) ---
+    # --- Model (see 03-technical-design.md section 1) ---
     base_model: str = "intfloat/multilingual-e5-small"
     # e5 REQUIRES asymmetric prefixes; forgetting them silently tanks recall.
     query_prefix: str = "query: "
@@ -17,7 +17,7 @@ class Config:
     max_seq_len: int = 128  # verses are short; keeps VRAM low -> bigger batch
     normalize_embeddings: bool = True  # L2-norm; must match at index + query time
 
-    # --- Data (see 03 §2) — all from the assignment's suggested Option-2 list ---
+    # --- Data (see 03 section 2) — all from the assignment's suggested Option-2 list ---
     itihasa_id: str = "rahular/itihasa"          # Sanskrit-English aligned corpora: train + in-domain eval
     gita_id: str = "JDhruv14/Bhagavad-Gita_Dataset"  # Bhagavad Gita: demo + qualitative eval (not gated)
     # AI4Bharat IN22: out-of-domain eval (GATED -> needs HF auth). n-way parallel.
@@ -32,7 +32,7 @@ class Config:
     iast_augment_ratio: float = 0.25  # fraction of Sanskrit side duplicated as IAST
     dedup: bool = True
 
-    # --- Training (see 03 §3) ---
+    # --- Training (see 03 section 3) ---
     batch_size: int = 64  # in-batch negatives -> larger is better (T4 fits ~64-128)
     epochs: int = 1
     learning_rate: float = 2e-5
@@ -59,7 +59,7 @@ class Config:
     rerank_top_n: int = 50             # retrieve top-N with bi-encoder, then rerank
     rerank_eval_queries: int = 500     # cap rerank-eval query count for speed
 
-    # --- Eval (see 03 §4) ---
+    # --- Eval (see 03 section 4) ---
     k_values: tuple[int, ...] = (1, 5, 10)
     eval_max_corpus: int = 2000  # cap eval corpus for speed in-notebook
 

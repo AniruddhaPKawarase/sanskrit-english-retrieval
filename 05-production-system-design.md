@@ -17,7 +17,7 @@ The system decomposes into five production components referenced throughout: (1)
 | Embedding service | Stateless replicas behind a load balancer. Serve via **Text Embeddings Inference (TEI)** or ONNX Runtime; e5-small is small enough that CPU serving is viable at low/medium QPS, GPU only when batch throughput demands it. Autoscale on p95 latency + queue depth, not CPU alone. |
 | Query batching | TEI/Triton **dynamic batching** — coalesce concurrent single-query requests into a micro-batch (e.g. 4–8 ms window) to amortize the forward pass. Biggest single throughput lever for embedding inference. |
 | Vector index | Move off in-process FAISS to a managed vector DB (Qdrant / pgvector / Pinecone) that owns replication and sharding. **Replicate** for read QPS and HA; **shard** only when the corpus outgrows a node's RAM (classical Sanskrit corpora are small — tens of millions of chunks at most — so a single well-provisioned node + replicas covers most realistic scales). |
-| Cold vs warm | Model weights and index must be memory-resident before a replica joins the LB pool. Use readiness probes gated on "model loaded + index attached + warm-up query passed." Keep a warm pool; avoid scale-to-zero on the serving path (cold-start = model load + index mmap = seconds, unacceptable for interactive search). Scale-to-zero is fine for dev only (§12). |
+| Cold vs warm | Model weights and index must be memory-resident before a replica joins the LB pool. Use readiness probes gated on "model loaded + index attached + warm-up query passed." Keep a warm pool; avoid scale-to-zero on the serving path (cold-start = model load + index mmap = seconds, unacceptable for interactive search). Scale-to-zero is fine for dev only (section 12). |
 | Model serving | e5-small requires the `query:` / `passage:` prefix convention — enforce it in the serving layer, not the client, so all callers get correct embeddings. |
 
 Sharding note: prefer **replication before sharding**. Sharding a vector index fragments recall (each shard returns local top-k, then you merge) and adds a fan-out/merge cost; only pay it when a single node genuinely can't hold the corpus.
@@ -31,7 +31,7 @@ Sharding note: prefer **replication before sharding**. Sharding a vector index f
 **Production design.** Two optimization surfaces — inference latency and search latency — plus caching.
 
 **Embedding inference latency:**
-- **INT8 dynamic quantization** (ONNX Runtime) — ~2–4× CPU speedup on transformer encoders with minor quality loss; re-run the offline eval after quantizing to confirm Recall@K holds (treat it as a gated model change, §6).
+- **INT8 dynamic quantization** (ONNX Runtime) — ~2–4× CPU speedup on transformer encoders with minor quality loss; re-run the offline eval after quantizing to confirm Recall@K holds (treat it as a gated model change, section 6).
 - **ONNX / TEI** export removes Python overhead and enables graph-level fusion.
 - **Matryoshka dimension truncation** — if the model is trained/tuned to be Matryoshka-capable, serve 256- or 128-dim vectors instead of 384 for a smaller index footprint and faster search, trading a measured slice of recall. e5-small is not natively Matryoshka; this requires MRL-aware fine-tuning, so flag it as a *candidate*, not a given.
 
@@ -48,7 +48,7 @@ For a Sanskrit corpus that fits in RAM, **HNSW** is the production default (best
 **Caching:**
 - **Query-embedding cache** — sacred/classical text search has a long tail of repeated canonical queries (famous verses, common terms). Cache `normalize(query) → embedding` (Redis, TTL + LRU). Skips the whole forward pass on a hit.
 - **Result cache** — cache `(query_hash, k, filters) → doc IDs`; invalidate on index version bump. High hit rate for popular queries.
-- **Batch vs realtime** — realtime for interactive search; batch mode (large offline embedding jobs) for corpus ingestion/re-embedding, run on cheaper preemptible compute (§12).
+- **Batch vs realtime** — realtime for interactive search; batch mode (large offline embedding jobs) for corpus ingestion/re-embedding, run on cheaper preemptible compute (section 12).
 
 ---
 
@@ -62,13 +62,13 @@ For a Sanskrit corpus that fits in RAM, **HNSW** is the production default (best
 |---|---|---|
 | Query latency p50 / p95 / p99 | Latency SLI/SLO | p95 < 150 ms (cache miss, CPU embed + HNSW search); p99 < 400 ms |
 | Throughput | Capacity | Sustained QPS per replica at target p95, published for capacity planning |
-| Recall@10 / nDCG@10 (online) | Quality | Must not regress below offline baseline − ε; sampled via labeled probes + feedback (§13) |
+| Recall@10 / nDCG@10 (online) | Quality | Must not regress below offline baseline − ε; sampled via labeled probes + feedback (section 13) |
 | Index freshness | Data | Time from source-corpus update → searchable; target < 1 h for incremental, tracked per ingest |
 | Cost-per-query | Cost | Blended embed + search + LLM cost; alert on drift (the LLM answer step usually dominates) |
 | Availability | Reliability | 99.9% on the retrieval path |
 | Cache hit rate | Efficiency | Tracked for query-embedding and result caches; informs cache sizing |
 
-Latency budget decomposition matters: instrument **embed time**, **search time**, **rerank time**, and **LLM time** separately (§13 tracing) — otherwise you can't tell whether a p95 breach is the encoder, the index, or the LLM.
+Latency budget decomposition matters: instrument **embed time**, **search time**, **rerank time**, and **LLM time** separately (section 13 tracing) — otherwise you can't tell whether a p95 breach is the encoder, the index, or the LLM.
 
 ---
 
@@ -92,7 +92,7 @@ Latency budget decomposition matters: instrument **embed time**, **search time**
 - **Rate limiting** — per-API-key token-bucket (protects the GPU/CPU embed pool and the paid LLM step, which is the real cost sink).
 - **Timeouts** — per-hop deadlines (embed, search, LLM) with a total request budget; cancel downstream work when the client budget is exhausted.
 - **Graceful degradation** — if vector search fails or times out, **fall back to BM25/keyword** over the same corpus so search still returns *something*; if the LLM answer step fails or times out, **return retrieved passages without the generated answer** (retrieval is the core product; generation is enhancement). Never fail the whole request because generation failed.
-- **Idempotency** — ingestion must be idempotent: a stable `document_id` (content hash or source-provided key) so retries upsert rather than duplicate. Critical because re-ingest/re-embed jobs (§10) replay documents.
+- **Idempotency** — ingestion must be idempotent: a stable `document_id` (content hash or source-provided key) so retries upsert rather than duplicate. Critical because re-ingest/re-embed jobs (section 10) replay documents.
 
 ---
 
@@ -106,12 +106,12 @@ Latency budget decomposition matters: instrument **embed time**, **search time**
 |---|---|
 | Prompt injection (LLM01) | Retrieved passages are *untrusted content* — never let them alter the system prompt. Strict prompt templating, delimiter isolation of retrieved text, instruction-hierarchy enforcement, output constraints. Highest-priority risk for the RAG step. |
 | Input validation / injection | Validate/normalize all query input; treat query text as data, never interpolate into shell/SQL/prompt control. |
-| Embedding inversion / data exfiltration (LLM06) | Embeddings can leak source text under inversion attacks. Don't expose raw vectors via the API; return doc IDs + text, not the vector. Access-control the vector DB (§11). |
-| Sensitive info disclosure | The corpus is public-domain sacred text (low secrecy), but **user queries are sensitive** — apply logging/retention limits (§7). Ensure the LLM step doesn't echo other users' data. |
-| Model supply chain (LLM05) | Pin model + dataset revisions; verify checksums; build models into the artifact registry from a trusted, reproducible pipeline (§6), not pulled live from HF at runtime. |
+| Embedding inversion / data exfiltration (LLM06) | Embeddings can leak source text under inversion attacks. Don't expose raw vectors via the API; return doc IDs + text, not the vector. Access-control the vector DB (section 11). |
+| Sensitive info disclosure | The corpus is public-domain sacred text (low secrecy), but **user queries are sensitive** — apply logging/retention limits (section 7). Ensure the LLM step doesn't echo other users' data. |
+| Model supply chain (LLM05) | Pin model + dataset revisions; verify checksums; build models into the artifact registry from a trusted, reproducible pipeline (section 6), not pulled live from HF at runtime. |
 | Dependency / CVE scanning | `pip-audit`/Snyk/Dependabot in CI; SBOM generation; block deploy on critical CVEs. |
 | Secrets handling | LLM API keys, vector DB creds in a secret manager (not env files in the image); short-lived, rotated. |
-| DoS via expensive queries | Bound `k`, payload size, and per-key rate (§4, §11 WAF). |
+| DoS via expensive queries | Bound `k`, payload size, and per-key rate (section 4, section 11 WAF). |
 
 ---
 
@@ -170,8 +170,8 @@ Because the index is reconstructible, **RPO for the index is effectively zero** 
 
 - **Tiered support** — T1 (usage/API-key/quota issues, runbook-driven), T2 (degraded quality/latency, on-call engineer), T3 (model/index defects → ML engineering).
 - **Runbooks** — for the concrete failure modes: "vector DB unreachable → confirm BM25 fallback engaged," "p95 latency breach → check embed vs search vs LLM split," "bad-recall reports → pull query, reproduce against index version, check normalization."
-- **On-call & incident classification** — sev levels by user impact: Sev1 retrieval down, Sev2 degraded (LLM step down but retrieval up — degraded per §4), Sev3 quality regression on a query class.
-- **Feedback loop (the ML-specific part)** — bad-retrieval reports and thumbs-down signals are not just tickets; they are **training data**. Route flagged queries into a review queue → confirmed bad results become **hard negatives** for the next fine-tuning round (§13 flywheel). This closes support into model improvement, which is the whole point of owning the model.
+- **On-call & incident classification** — sev levels by user impact: Sev1 retrieval down, Sev2 degraded (LLM step down but retrieval up — degraded per section 4), Sev3 quality regression on a query class.
+- **Feedback loop (the ML-specific part)** — bad-retrieval reports and thumbs-down signals are not just tickets; they are **training data**. Route flagged queries into a review queue → confirmed bad results become **hard negatives** for the next fine-tuning round (section 13 flywheel). This closes support into model improvement, which is the whole point of owning the model.
 
 ---
 
@@ -183,9 +183,9 @@ Because the index is reconstructible, **RPO for the index is effectively zero** 
 
 | Task | Cadence / trigger |
 |---|---|
-| Model retraining | Periodic (e.g. quarterly) or triggered by accumulated hard negatives / measured quality drift. Gated by §6 eval-gate before promotion. |
-| Index re-embedding | **Mandatory on any model upgrade** — embeddings from model v(n) and v(n+1) are not comparable, so the entire index must be re-embedded with the new model. Do it as a background batch job (§12 preemptible compute) into a **new index version**, then atomically switch the alias — zero-downtime cutover, instant rollback. |
-| Dependency updates | Regular patching; CVE-driven out-of-band (§5). |
+| Model retraining | Periodic (e.g. quarterly) or triggered by accumulated hard negatives / measured quality drift. Gated by section 6 eval-gate before promotion. |
+| Index re-embedding | **Mandatory on any model upgrade** — embeddings from model v(n) and v(n+1) are not comparable, so the entire index must be re-embedded with the new model. Do it as a background batch job (section 12 preemptible compute) into a **new index version**, then atomically switch the alias — zero-downtime cutover, instant rollback. |
+| Dependency updates | Regular patching; CVE-driven out-of-band (section 5). |
 | Data drift monitoring | Track **query-distribution drift** (are users asking things unlike the training distribution? e.g. new scripts, transliteration styles, out-of-corpus topics) and recall drift on labeled probes. Drift → retrain trigger. |
 | Deprecation | Version endpoints and index/model versions; announce and sunset old model versions with a migration window. |
 
@@ -195,19 +195,19 @@ The re-embed-on-upgrade + alias-swap pattern is the maintenance backbone: model 
 
 ## 11. Network & security requirements
 
-**Take-home scope.** N/A — local notebook, no network surface. (Provenance pinning from §5 is the only applicable item.)
+**Take-home scope.** N/A — local notebook, no network surface. (Provenance pinning from section 5 is the only applicable item.)
 
 **Production design.**
 
 | Layer | Control |
 |---|---|
 | Transport | **TLS** everywhere; HSTS at the edge. |
-| Vector DB isolation | Vector DB in a **private VPC subnet**, no public IP; reachable only from the query/ingest services via internal networking + security groups. It holds the derived corpus and must never be internet-exposed (embedding-inversion risk, §5). |
+| Vector DB isolation | Vector DB in a **private VPC subnet**, no public IP; reachable only from the query/ingest services via internal networking + security groups. It holds the derived corpus and must never be internet-exposed (embedding-inversion risk, section 5). |
 | AuthN / AuthZ | API keys for service clients; **OAuth2/OIDC** for user-facing access; per-key scopes (query vs ingest are different privileges). |
 | Network policies | Default-deny between namespaces/services; explicit allow only for the required embed→index→LLM path. |
 | Egress control | The **LLM answer step is the only egress to a third party** — pin it to an allowlisted endpoint, route through an egress proxy, log all outbound. Prevents both exfiltration and surprise dependencies. |
-| Edge protection | **WAF + DDoS** protection at the edge; bot/abuse rules; rate limiting (§4) as the app-layer backstop. |
-| Secrets | Managed secret store, rotation, no secrets in images (§5). |
+| Edge protection | **WAF + DDoS** protection at the edge; bot/abuse rules; rate limiting (section 4) as the app-layer backstop. |
+| Secrets | Managed secret store, rotation, no secrets in images (section 5). |
 
 ---
 
@@ -223,8 +223,8 @@ The re-embed-on-upgrade + alias-swap pattern is the maintenance backbone: model 
 | **GPU vs CPU serving** | e5-small is small — **CPU serving (ONNX/TEI, INT8) is viable and cheaper at low/medium QPS**. Reserve GPU for the batch re-embedding jobs and only add GPU serving replicas when sustained QPS makes batched GPU throughput cheaper per query than CPU. Default to CPU; justify GPU with numbers. |
 | **Spot/preemptible for batch** | Corpus (re-)embedding is idempotent, restartable, and non-interactive → run it on **spot/preemptible GPUs** with checkpointing. Big cost win on the heaviest workload. |
 | **Autoscaling** | Scale the embedding service on p95 latency + queue depth; scale index replicas on read QPS. |
-| **Scale-to-zero (dev only)** | Dev/staging serving scales to zero off-hours; **never** on the prod retrieval path (cold model load is user-visible, §1). |
-| **Cost guardrails** | Budgets + alerts, with special attention to the **LLM answer step** (per-token cost, usually the dominant line item) and GPU hours. Cache hits (§2) directly cut both LLM and embed spend. |
+| **Scale-to-zero (dev only)** | Dev/staging serving scales to zero off-hours; **never** on the prod retrieval path (cold model load is user-visible, section 1). |
+| **Cost guardrails** | Budgets + alerts, with special attention to the **LLM answer step** (per-token cost, usually the dominant line item) and GPU hours. Cache hits (section 2) directly cut both LLM and embed spend. |
 
 ---
 
@@ -232,8 +232,8 @@ The re-embed-on-upgrade + alias-swap pattern is the maintenance backbone: model 
 
 Items critical to *this* system that the 12 standard sections underweight:
 
-- **Observability / tracing** — **OpenTelemetry** distributed traces across embed → search → rerank → LLM, with per-hop latency spans (feeds §3's latency-budget decomposition). Structured logs (query hash, index version, model version, k, cache hit/miss) and metrics dashboards. Without per-hop tracing you cannot debug a p95 breach in a multi-stage RAG pipeline.
-- **Ingestion / chunking pipeline at scale** — verses/ślokas are naturally short and self-contained, which is convenient, but production ingest still needs a defined chunking policy (verse-level vs passage-level, overlap, metadata attachment: source, book, canto, translation attribution). Chunking choices directly move Recall@K, so they are versioned alongside the model and re-run on re-embed (§10).
-- **Multilingual / transliteration handling in prod** — this is Sanskrit-specific and easy to miss: users query in **Devanāgarī, IAST, Harvard-Kyoto, or romanized ad-hoc** forms. Normalize scripts at query time (Devanāgarī↔IAST/transliteration normalization) *before* embedding, and index the corpus consistently, so "the same verse" retrieves regardless of input script. Mismatched normalization between ingest and query is a silent recall killer. Expose a script/language hint in the API (§4) to disambiguate.
-- **Evaluation in production** — the offline metrics (§3) are a snapshot; production truth comes from **online A/B testing** of retrieval variants (model versions, ANN params, chunking) measured on **click/dwell/feedback signals**, plus a small continuously-labeled probe set to detect live recall regression.
-- **Data flywheel** — the loop that makes owning the model worthwhile: user queries + feedback (thumbs, clicks, T1 bad-retrieval reports from §9) → hard-negative mining → next fine-tune → eval-gate (§6) → re-embed + alias swap (§10). Each turn of the wheel improves retrieval on the *actual* query distribution, not just the static Itihasa split. This is the strategic reason to fine-tune a model you control rather than call a closed embedding API.
+- **Observability / tracing** — **OpenTelemetry** distributed traces across embed → search → rerank → LLM, with per-hop latency spans (feeds section 3's latency-budget decomposition). Structured logs (query hash, index version, model version, k, cache hit/miss) and metrics dashboards. Without per-hop tracing you cannot debug a p95 breach in a multi-stage RAG pipeline.
+- **Ingestion / chunking pipeline at scale** — verses/ślokas are naturally short and self-contained, which is convenient, but production ingest still needs a defined chunking policy (verse-level vs passage-level, overlap, metadata attachment: source, book, canto, translation attribution). Chunking choices directly move Recall@K, so they are versioned alongside the model and re-run on re-embed (section 10).
+- **Multilingual / transliteration handling in prod** — this is Sanskrit-specific and easy to miss: users query in **Devanāgarī, IAST, Harvard-Kyoto, or romanized ad-hoc** forms. Normalize scripts at query time (Devanāgarī↔IAST/transliteration normalization) *before* embedding, and index the corpus consistently, so "the same verse" retrieves regardless of input script. Mismatched normalization between ingest and query is a silent recall killer. Expose a script/language hint in the API (section 4) to disambiguate.
+- **Evaluation in production** — the offline metrics (section 3) are a snapshot; production truth comes from **online A/B testing** of retrieval variants (model versions, ANN params, chunking) measured on **click/dwell/feedback signals**, plus a small continuously-labeled probe set to detect live recall regression.
+- **Data flywheel** — the loop that makes owning the model worthwhile: user queries + feedback (thumbs, clicks, T1 bad-retrieval reports from section 9) → hard-negative mining → next fine-tune → eval-gate (section 6) → re-embed + alias swap (section 10). Each turn of the wheel improves retrieval on the *actual* query distribution, not just the static Itihasa split. This is the strategic reason to fine-tune a model you control rather than call a closed embedding API.
