@@ -1,0 +1,24 @@
+# Core ML
+torch>=2.2
+transformers>=4.44
+sentence-transformers>=3.0
+datasets>=2.20
+
+# Retrieval / eval
+faiss-cpu>=1.8
+scikit-learn>=1.4
+sacrebleu>=2.4
+
+# Sanskrit / script handling
+indic-transliteration>=2.3
+
+# Analysis / reporting
+pandas>=2.2
+numpy>=1.26
+matplotlib>=3.8
+
+# Tests
+pytest>=8.0
+
+# NOTE: on Colab, torch is preinstalled — do NOT pin it hard or you fight the runtime.
+# Install with:  pip install -r requirements.txt  (skip torch on Colab)
