@@ -118,6 +118,10 @@ Colab notebook ✓ · training/inference scripts (`src/`) ✓ · README ✓ · r
 sample outputs (`results/`) ✓ · eval scripts (`src/evaluate.py`, `tests/`) ✓ · mini-RAG (`mini_rag.py`) ✓ ·
 bonus: quantization, e5-base comparison, tokenizer/fertility, cross-lingual eval ✓.
 
+**Optional "interesting areas" (spec) — all addressed:** cross-lingual alignment · transliteration
+mismatch (IAST augmentation) · chunking (verses are atomic — no splitting) · embedding L2-normalization ·
+retrieval failure modes. Details in [`report/REPORT.md`](report/REPORT.md).
+
 ## License / data provenance
 Model MIT · Itihasa public-domain · Bhagavad Gita public-domain source · IN22 open / FLORES CC-BY-SA
 (both gated) — clean for reuse. Sanskrit sacred/classical text handled with attribution and respect.

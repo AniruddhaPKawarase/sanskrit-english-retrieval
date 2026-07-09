@@ -129,6 +129,14 @@ Itihasa slice reported an inflated R@1 0.812, which overstated generalization an
 - **Tokenizer fragmentation.** Measured Devanagari fertility **3.36 tok/word** caps achievable
   quality and eats context; documented, not fixed (tokenizer surgery is out-of-scope in-budget).
 
+## Optional interesting areas (per the spec) — how each was addressed
+The Option-2 spec calls out five optional areas; all five were considered, four implemented:
+- **Cross-lingual alignment** — directional Sa→En *and* En→Sa training pairs with e5's asymmetric `query:` / `passage:` prefixes; the whole task is Sanskrit-query → English-passage retrieval.
+- **Transliteration mismatch** — 25% of the Sanskrit side augmented to IAST during training; verified in section 7 that a verse retrieves the same top-1 in Devanagari and IAST.
+- **Chunking strategy** — verses are atomic 1–4 line units, so **they are the chunks**; no splitting is applied and 512-token sequences are ample (a deliberate no-op, not an oversight).
+- **Embedding normalization** — embeddings are **L2-normalized** at train, index, and query time, so cosine similarity is computed as a plain inner product (FAISS `IndexFlatIP`); consistency across all three stages is enforced as a silent-failure guard.
+- **Retrieval failure modes** — analysed in section 7 (hard-negative false negatives, domain shift, tokenizer fragmentation) plus the honest "translation-retrieval is easier than open QA" caveat.
+
 ## 8. Challenges encountered
 Cross-lingual asymmetry (correct query/passage prefixing is a silent-failure landmine — pinned by a
 unit test), transliteration handling, honest eval framing (1:1 verse retrieval is *translation
