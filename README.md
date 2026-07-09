@@ -36,8 +36,11 @@ More examples:
 ```bash
 python mini_rag.py --k 3 "the duty of a warrior in battle"
 python mini_rag.py "धर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः"      # Sanskrit (Devanagari) query
+python mini_rag.py --reverse "detachment from the fruits of action"  # vice-versa: English query -> Sanskrit verses
 python mini_rag.py --model artifacts/e5-small-sa-en-mnrl "karma"      # use the fine-tuned checkpoint
 ```
+Both directions work because the model is trained bidirectionally (Sa→En *and* En→Sa pairs):
+default retrieves English verses; `--reverse` indexes the Sanskrit verses and retrieves those.
 
 - **Out of the box** the demo downloads the **fine-tuned checkpoint from the Hugging Face Hub**
   (`AniruddhaAI/sanskrit-e5-small-retrieval`) — this gives the strong Sanskrit results below.

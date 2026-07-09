@@ -3,6 +3,7 @@
     python mini_rag.py "what does the Gita say about karma?"
     python mini_rag.py --k 5 "the duty of a warrior in battle"
     python mini_rag.py "धर्मक्षेत्रे कुरुक्षेत्रे"           # Sanskrit (Devanagari) query
+    python mini_rag.py --reverse "detachment from the fruits of action"   # English query -> Sanskrit verses
     python mini_rag.py --model artifacts/e5-small-sa-en-mnrl "karma"   # explicit local checkpoint
 
 Corpus = Bhagavad Gita (701 verses, downloaded from Hugging Face on first run).
@@ -40,6 +41,8 @@ def main():
     ap.add_argument("query", nargs="*", help="query text (English or Sanskrit); prompts if omitted")
     ap.add_argument("--k", type=int, default=5, help="number of passages to retrieve (default 5)")
     ap.add_argument("--model", default=None, help="HF id or local path (default: local checkpoint, else HF, else base)")
+    ap.add_argument("--reverse", action="store_true",
+                    help="vice-versa: English query -> retrieve Sanskrit verses (default: query -> English verses)")
     args = ap.parse_args()
 
     query = " ".join(args.query).strip() or input("Query: ").strip()
@@ -56,9 +59,12 @@ def main():
         print("       (publish the fine-tuned weights to HF, or run the notebook to create artifacts/, for best results)")
         m = M.load_model(cfg, checkpoint=cfg.base_model)
 
+    gita_sa, gita_en = data.load_gita()
+    passages = gita_sa if args.reverse else gita_en
+    direction = "English query -> Sanskrit verse" if args.reverse else "query -> English verse"
+    print(f"[direction] {direction}")
     print("[corpus] Bhagavad Gita — downloading + indexing 701 verses ...")
-    _, gita_en = data.load_gita()
-    idx = IX.VerseIndex(m, gita_en, cfg)
+    idx = IX.VerseIndex(m, passages, cfg)
 
     hits = idx.search(query, k=args.k)
     print(f"\nTop {args.k} passages for: {query!r}\n" + "-" * 60)
