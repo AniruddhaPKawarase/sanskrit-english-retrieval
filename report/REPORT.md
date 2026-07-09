@@ -92,6 +92,21 @@ Slightly below in-domain (R@1 0.718 vs 0.789) — the honest, expected cost of g
 corpus. This is the trustworthy generalization number; an earlier run that fell back to a *same-domain*
 Itihasa slice reported an inflated R@1 0.812, which overstated generalization and was discarded.
 
+**Reverse direction (En→Sa) — English query → Sanskrit verse (in-domain Itihasa test).** The model is
+trained bidirectionally, so retrieval works both ways; roles are swapped (queries = English, corpus =
+Sanskrit, gold = the aligned shloka):
+
+| Metric | Base | Fine-tuned |
+|---|---|---|
+| Recall@1 | 0.292 | **0.786** |
+| Recall@10 | 0.574 | **0.941** |
+| MRR@10 | 0.376 | **0.837** |
+| nDCG@10 | 0.423 | **0.862** |
+
+Near-identical to Sa→En (0.789 / 0.937 / 0.841 / 0.864) — the fine-tuning is symmetric. The base model
+is already stronger at En→Sa (R@1 0.292 vs 0.147) because English queries start easier, but both
+directions converge after fine-tuning.
+
 **Bonus results:**
 - **e5-base vs e5-small (both fine-tuned, in-domain):** e5-base wins — Recall@1 **0.877 vs 0.789**,
   Recall@10 0.973 vs 0.937, nDCG@10 0.925 vs 0.864. ~+9 pts Recall@1 for ~2.4× params.
@@ -103,7 +118,8 @@ Itihasa slice reported an inflated R@1 0.812, which overstated generalization an
 | # | Config | Recall@1 | Recall@10 | nDCG@10 | Note |
 |---|---|---|---|---|---|
 | base | e5-small, no FT | 0.147 | 0.331 | 0.230 | weak Sanskrit baseline (expected) |
-| A | e5-small, MNRL, bs64, 1ep | 0.789 | 0.937 | 0.864 | headline run |
+| A | e5-small, MNRL, bs64, 1ep | 0.789 | 0.937 | 0.864 | headline run (Sa→En) |
+| A (En→Sa) | e5-small, same model, reverse direction | 0.786 | 0.941 | 0.862 | symmetric — bidirectional training works |
 | bonus | e5-base, MNRL, bs64, 1ep | 0.877 | 0.973 | 0.925 | best quality |
 | OOD | e5-small run A, Gita cross-domain | 0.718 | 0.940 | 0.832 | honest generalization |
 | B (pre-fix) | e5-small + naive hard-negs (20K) | 0.676 | 0.884 | 0.778 | regressed — false negatives (section 7) |
@@ -147,7 +163,7 @@ preserving a large negative count.
 Already explored (bonus): e5-base (higher quality), INT8 quantization (free 4× index shrink), and
 hard-negative mining (regressed on naive settings → fixed with a false-negative margin guard, section 7).
 Remaining: a true out-of-domain number via authenticated IN22/FLORES (or the wired Gita tier); a
-hand-labelled thematic query set for RAG-realistic eval beyond 1:1 translation retrieval; the
-reverse (En→Sa) retrieval direction reported alongside Sa→En; a query-time script-normalization step
+hand-labelled thematic query set for RAG-realistic eval beyond 1:1 translation retrieval; a
+query-time script-normalization step
 to close the transliteration gap; more epochs / larger batch on e5-base; embedding-space UMAP
 before/after visualization; and the production hardening designed in `05-production-system-design.md`.
